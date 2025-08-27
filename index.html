@@ -25,6 +25,8 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px; /* Ajout d'un padding pour les petits écrans */
+            box-sizing: border-box;
         }
 
         .game-container {
@@ -37,6 +39,8 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px var(--shadow-color);
             border: 2px solid var(--accent-color);
+            width: 100%; /* S'adapte à la largeur de l'écran */
+            max-width: 600px; /* Limite la largeur sur les grands écrans */
         }
 
         h1 {
@@ -44,6 +48,7 @@
             text-shadow: 2px 2px var(--shadow-color);
             font-size: 2.5em;
             margin: 0;
+            text-align: center;
         }
 
         .game-area {
@@ -51,6 +56,7 @@
             gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
         }
 
         canvas {
@@ -58,9 +64,8 @@
             border: 4px solid var(--text-color);
             border-radius: 10px;
             box-shadow: 0 0 15px var(--shadow-color) inset;
-            /* Largeur et hauteur fixes pour éviter la déformation */
-            width: 240px; 
-            height: 480px;
+            width: 240px; /* Largeur fixe pour le canvas principal */
+            height: 480px; /* Hauteur fixe pour le canvas principal */
         }
         
         .sidebar {
@@ -103,7 +108,7 @@
             border-radius: 10px;
             border: 1px solid #4a5988;
             text-align: center;
-            height: 120px; /* Taille fixe pour éviter la déformation */
+            height: 120px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -160,6 +165,49 @@
             transform: none;
         }
 
+        /* Styles pour les contrôles tactiles */
+        .mobile-controls {
+            display: none; /* Masqué par défaut */
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Permet un bon affichage sur petits écrans */
+        }
+        .mobile-controls button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+        }
+        .mobile-controls .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* Affichage des contrôles tactiles sur les petits écrans */
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex; /* Affiché sur mobile */
+            }
+            .game-area {
+                flex-direction: column; /* Colonne sur mobile */
+            }
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .stat-box, .next-piece-container, .difficulty-group, .button-group {
+                flex: 1 1 45%; /* Flexibilité des éléments */
+                min-width: unset;
+            }
+            
+            /* Ajustement pour que tout ne soit pas trop serré */
+            .stat-box, .next-piece-container {
+                padding: 10px;
+            }
+        }
+        
         .game-over-overlay {
             position: absolute;
             top: 0;
@@ -195,7 +243,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            display: none; /* Rendu invisible par défaut */
+            display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -263,6 +311,15 @@
                 </div>
             </div>
         </div>
+        <div class="mobile-controls">
+            <div class="action-buttons">
+                <button id="rotateBtn">Rotation</button>
+                <button id="downBtn">Bas</button>
+            </div>
+            <button id="leftBtn">Gauche</button>
+            <button id="rightBtn">Droite</button>
+            <button id="dropBtn">Descendre</button>
+        </div>
     </div>
 
     <div id="gameOverOverlay" class="game-over-overlay">
@@ -291,6 +348,13 @@
             const finalScoreElement = document.getElementById('finalScore');
             const gameOverTitle = document.getElementById('gameOverTitle');
             const initialOverlay = document.getElementById('initialOverlay');
+
+            // Commandes mobiles
+            const leftBtn = document.getElementById('leftBtn');
+            const rightBtn = document.getElementById('rightBtn');
+            const rotateBtn = document.getElementById('rotateBtn');
+            const downBtn = document.getElementById('downBtn');
+            const dropBtn = document.getElementById('dropBtn');
 
             // Dimensions de la grille
             const COLS = 12; 
@@ -551,6 +615,50 @@
                 }
                 draw();
             });
+            
+            // Gère les clics sur les boutons mobiles
+            leftBtn.addEventListener('click', () => {
+                if (!currentPiece || isPaused || isGameOver) return;
+                if (!isCollision(currentPiece.x - 1, currentPiece.y, currentPiece.shape)) {
+                    currentPiece.x--;
+                }
+                draw();
+            });
+
+            rightBtn.addEventListener('click', () => {
+                if (!currentPiece || isPaused || isGameOver) return;
+                if (!isCollision(currentPiece.x + 1, currentPiece.y, currentPiece.shape)) {
+                    currentPiece.x++;
+                }
+                draw();
+            });
+
+            rotateBtn.addEventListener('click', () => {
+                if (!currentPiece || isPaused || isGameOver) return;
+                const newShape = rotate(currentPiece.shape);
+                if (!isCollision(currentPiece.x, currentPiece.y, newShape)) {
+                    currentPiece.shape = newShape;
+                }
+                draw();
+            });
+
+            downBtn.addEventListener('click', () => {
+                if (!currentPiece || isPaused || isGameOver) return;
+                if (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                    currentPiece.y++;
+                }
+                draw();
+            });
+
+            dropBtn.addEventListener('click', () => {
+                if (!currentPiece || isPaused || isGameOver) return;
+                while (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                    currentPiece.y++;
+                }
+                mergePiece();
+                draw();
+            });
+
 
             // Fait pivoter la pièce
             function rotate(shape) {
@@ -631,7 +739,6 @@
             // Initialisation
             loadHighScore();
             
-            // Le message de bienvenue est maintenant masqué par défaut dans le CSS.
         });
     </script>
 </body>
