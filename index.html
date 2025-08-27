@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris Moderne</title>
+    <title>Tetris Mobile & Tactile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -25,8 +25,11 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px; /* Ajout d'un padding pour les petits écrans */
+            padding: 10px;
             box-sizing: border-box;
+            user-select: none; /* Empêche la sélection de texte sur mobile */
+            -webkit-user-select: none;
+            touch-action: manipulation; /* Optimisation des événements tactiles */
         }
 
         .game-container {
@@ -39,24 +42,32 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px var(--shadow-color);
             border: 2px solid var(--accent-color);
-            width: 100%; /* S'adapte à la largeur de l'écran */
-            max-width: 600px; /* Limite la largeur sur les grands écrans */
+            width: 100%;
+            max-width: 650px;
         }
 
         h1 {
             color: var(--accent-color);
             text-shadow: 2px 2px var(--shadow-color);
             font-size: 2.5em;
-            margin: 0;
+            margin: 0 0 10px 0;
             text-align: center;
         }
 
-        .game-area {
+        .main-game-area {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             width: 100%;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .main-game-area {
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+            }
         }
 
         canvas {
@@ -64,17 +75,35 @@
             border: 4px solid var(--text-color);
             border-radius: 10px;
             box-shadow: 0 0 15px var(--shadow-color) inset;
-            width: 240px; /* Largeur fixe pour le canvas principal */
-            height: 480px; /* Hauteur fixe pour le canvas principal */
+            width: 240px;
+            height: 480px;
         }
         
-        .sidebar {
-            display: flex;
+        .sidebar-desktop {
+            display: none;
             flex-direction: column;
             gap: 15px;
             padding: 10px;
             min-width: 150px;
             justify-content: space-between;
+        }
+
+        .sidebar-mobile {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar-desktop {
+                display: flex;
+            }
+            .sidebar-mobile {
+                display: none;
+            }
         }
 
         .stat-box {
@@ -84,6 +113,7 @@
             text-align: center;
             border: 1px solid #4a5988;
             transition: transform 0.2s ease-in-out;
+            flex: 1;
         }
 
         .stat-box:hover {
@@ -129,10 +159,21 @@
             height: 80px;
         }
 
-        .button-group, .difficulty-group {
+        .controls-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            width: 100%;
+        }
+        
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .controls-row button, .controls-group select {
+            flex: 1;
         }
 
         button, select {
@@ -164,49 +205,6 @@
             box-shadow: none;
             transform: none;
         }
-
-        /* Styles pour les contrôles tactiles */
-        .mobile-controls {
-            display: none; /* Masqué par défaut */
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap; /* Permet un bon affichage sur petits écrans */
-        }
-        .mobile-controls button {
-            padding: 15px 25px;
-            font-size: 1.2em;
-        }
-        .mobile-controls .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        /* Affichage des contrôles tactiles sur les petits écrans */
-        @media (max-width: 768px) {
-            .mobile-controls {
-                display: flex; /* Affiché sur mobile */
-            }
-            .game-area {
-                flex-direction: column; /* Colonne sur mobile */
-            }
-            .sidebar {
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .stat-box, .next-piece-container, .difficulty-group, .button-group {
-                flex: 1 1 45%; /* Flexibilité des éléments */
-                min-width: unset;
-            }
-            
-            /* Ajustement pour que tout ne soit pas trop serré */
-            .stat-box, .next-piece-container {
-                padding: 10px;
-            }
-        }
         
         .game-over-overlay {
             position: absolute;
@@ -235,22 +233,6 @@
             color: var(--text-color);
             margin-bottom: 20px;
         }
-        
-        .initial-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-            z-index: 100;
-            padding: 20px;
-        }
 
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -272,10 +254,11 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>Tetris Moderne</h1>
-        <div class="game-area">
+        <h1>Tetris Tactile</h1>
+        <div class="main-game-area">
             <canvas id="tetrisCanvas" width="240" height="480"></canvas>
-            <div class="sidebar">
+            
+            <div class="sidebar-desktop">
                 <div class="stat-box">
                     <h2>Score</h2>
                     <p id="scoreDisplay">0</p>
@@ -296,29 +279,47 @@
                     <h2>Prochaine Pièce</h2>
                     <canvas id="nextPieceCanvas" width="80" height="80"></canvas>
                 </div>
-                <div class="difficulty-group">
-                    <label for="difficulty" style="text-align:center;">Difficulté:</label>
+                <div class="controls-group">
                     <select id="difficulty">
                         <option value="easy">Facile</option>
                         <option value="normal" selected>Normal</option>
                         <option value="hard">Difficile</option>
                         <option value="expert">Expert</option>
                     </select>
-                </div>
-                <div class="button-group">
                     <button id="startGameBtn">Nouvelle Partie</button>
                     <button id="pauseBtn">Pause</button>
                 </div>
             </div>
         </div>
-        <div class="mobile-controls">
-            <div class="action-buttons">
-                <button id="rotateBtn">Rotation</button>
-                <button id="downBtn">Bas</button>
+        
+        <div class="sidebar-mobile">
+            <div class="stat-box">
+                <h2>Score</h2>
+                <p id="scoreDisplayMobile">0</p>
             </div>
-            <button id="leftBtn">Gauche</button>
-            <button id="rightBtn">Droite</button>
-            <button id="dropBtn">Descendre</button>
+            <div class="stat-box">
+                <h2>Lignes</h2>
+                <p id="linesDisplayMobile">0</p>
+            </div>
+            <div class="stat-box">
+                <h2>Niveau</h2>
+                <p id="levelDisplayMobile">1</p>
+            </div>
+        </div>
+
+        <div class="controls-group">
+            <div class="controls-row">
+                <select id="difficultyMobile">
+                    <option value="easy">Facile</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="hard">Difficile</option>
+                    <option value="expert">Expert</option>
+                </select>
+            </div>
+            <div class="controls-row">
+                <button id="startGameBtnMobile">Nouvelle Partie</button>
+                <button id="pauseBtnMobile">Pause</button>
+            </div>
         </div>
     </div>
 
@@ -341,20 +342,21 @@
             const levelDisplay = document.getElementById('levelDisplay');
             const highScoreDisplay = document.getElementById('highScoreDisplay');
             
+            const scoreDisplayMobile = document.getElementById('scoreDisplayMobile');
+            const linesDisplayMobile = document.getElementById('linesDisplayMobile');
+            const levelDisplayMobile = document.getElementById('levelDisplayMobile');
+            
             const startGameBtn = document.getElementById('startGameBtn');
             const pauseBtn = document.getElementById('pauseBtn');
             const difficultySelect = document.getElementById('difficulty');
+            
+            const startGameBtnMobile = document.getElementById('startGameBtnMobile');
+            const pauseBtnMobile = document.getElementById('pauseBtnMobile');
+            const difficultySelectMobile = document.getElementById('difficultyMobile');
+            
             const gameOverOverlay = document.getElementById('gameOverOverlay');
             const finalScoreElement = document.getElementById('finalScore');
             const gameOverTitle = document.getElementById('gameOverTitle');
-            const initialOverlay = document.getElementById('initialOverlay');
-
-            // Commandes mobiles
-            const leftBtn = document.getElementById('leftBtn');
-            const rightBtn = document.getElementById('rightBtn');
-            const rotateBtn = document.getElementById('rotateBtn');
-            const downBtn = document.getElementById('downBtn');
-            const dropBtn = document.getElementById('dropBtn');
 
             // Dimensions de la grille
             const COLS = 12; 
@@ -375,6 +377,12 @@
             let level = 1;
             let isPaused = false;
             let isGameOver = false;
+
+            // Variables pour les contrôles tactiles
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let lastTapTime = 0;
+            let dropTimer = null;
 
             // Formes des pièces (Tetrominos)
             const PIECES = [
@@ -541,6 +549,7 @@
                     updateScore(linesCleared);
                     lines += linesCleared;
                     linesDisplay.textContent = lines;
+                    linesDisplayMobile.textContent = lines;
                     updateLevel();
                 }
             }
@@ -550,6 +559,7 @@
                 const points = [0, 10, 30, 60, 100]; // Points par ligne: 1, 2, 3, 4
                 score += points[linesCleared] * level;
                 scoreDisplay.textContent = score;
+                scoreDisplayMobile.textContent = score;
             }
             
             // Met à jour le niveau
@@ -557,6 +567,7 @@
                 if (lines > 0 && lines % 10 === 0) {
                     level++;
                     levelDisplay.textContent = level;
+                    levelDisplayMobile.textContent = level;
                     resetGameLoop();
                 }
             }
@@ -564,7 +575,7 @@
             // Met à jour la boucle de jeu en fonction de la difficulté et du niveau
             function resetGameLoop() {
                 clearInterval(gameLoop);
-                const difficulty = difficultySelect.value;
+                const difficulty = window.innerWidth >= 768 ? difficultySelect.value : difficultySelectMobile.value;
                 const baseSpeed = DIFFICULTIES[difficulty];
                 const newSpeed = baseSpeed - (level - 1) * 50;
                 gameLoop = setInterval(dropPiece, newSpeed > 100 ? newSpeed : 100);
@@ -582,7 +593,7 @@
                 draw();
             }
 
-            // Gère les mouvements du joueur
+            // Gère les mouvements du joueur (clavier)
             document.addEventListener('keydown', e => {
                 if (!currentPiece || isPaused || isGameOver) return;
                 
@@ -615,50 +626,82 @@
                 }
                 draw();
             });
-            
-            // Gère les clics sur les boutons mobiles
-            leftBtn.addEventListener('click', () => {
-                if (!currentPiece || isPaused || isGameOver) return;
-                if (!isCollision(currentPiece.x - 1, currentPiece.y, currentPiece.shape)) {
-                    currentPiece.x--;
+
+            // Gère les événements tactiles
+            canvas.addEventListener('touchstart', e => {
+                if (isPaused || isGameOver) return;
+                e.preventDefault();
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                
+                // Double tap pour faire tomber la pièce
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                if (tapLength < 300 && tapLength > 0) {
+                    while (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                        currentPiece.y++;
+                    }
+                    mergePiece();
+                    draw();
                 }
-                draw();
+                lastTapTime = currentTime;
+                
+                // Gère la chute rapide si le doigt reste appuyé
+                dropTimer = setTimeout(() => {
+                    while (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                        currentPiece.y++;
+                    }
+                    mergePiece();
+                    draw();
+                }, 1000); // Fait tomber la pièce après 1 seconde d'appui
             });
 
-            rightBtn.addEventListener('click', () => {
-                if (!currentPiece || isPaused || isGameOver) return;
-                if (!isCollision(currentPiece.x + 1, currentPiece.y, currentPiece.shape)) {
-                    currentPiece.x++;
+            canvas.addEventListener('touchmove', e => {
+                if (isPaused || isGameOver) return;
+                e.preventDefault();
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                
+                const dx = touchEndX - touchStartX;
+                const dy = touchEndY - touchStartY;
+                
+                // Si on glisse plus horizontalement que verticalement
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > BLOCK_SIZE) {
+                    if (dx > 0 && !isCollision(currentPiece.x + 1, currentPiece.y, currentPiece.shape)) {
+                        currentPiece.x++;
+                    } else if (dx < 0 && !isCollision(currentPiece.x - 1, currentPiece.y, currentPiece.shape)) {
+                        currentPiece.x--;
+                    }
+                    touchStartX = touchEndX;
                 }
-                draw();
-            });
-
-            rotateBtn.addEventListener('click', () => {
-                if (!currentPiece || isPaused || isGameOver) return;
-                const newShape = rotate(currentPiece.shape);
-                if (!isCollision(currentPiece.x, currentPiece.y, newShape)) {
-                    currentPiece.shape = newShape;
-                }
-                draw();
-            });
-
-            downBtn.addEventListener('click', () => {
-                if (!currentPiece || isPaused || isGameOver) return;
-                if (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                
+                // Si on glisse vers le bas
+                if (dy > BLOCK_SIZE && !isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
                     currentPiece.y++;
+                    touchStartY = touchEndY;
                 }
+                
                 draw();
             });
 
-            dropBtn.addEventListener('click', () => {
-                if (!currentPiece || isPaused || isGameOver) return;
-                while (!isCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
-                    currentPiece.y++;
+            canvas.addEventListener('touchend', e => {
+                if (isPaused || isGameOver) return;
+                e.preventDefault();
+                clearTimeout(dropTimer);
+                
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                
+                // Si le mouvement était court, c'est un "tap" pour la rotation
+                if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+                    const newShape = rotate(currentPiece.shape);
+                    if (!isCollision(currentPiece.x, currentPiece.y, newShape)) {
+                        currentPiece.shape = newShape;
+                    }
                 }
-                mergePiece();
+                
                 draw();
             });
-
 
             // Fait pivoter la pièce
             function rotate(shape) {
@@ -668,21 +711,24 @@
 
             // Démarre une nouvelle partie
             function startGame() {
-                // Masque le message de bienvenue s'il est affiché
-                if (initialOverlay) {
-                    initialOverlay.style.display = 'none';
-                }
-
                 score = 0;
                 lines = 0;
                 level = 1;
                 isPaused = false;
                 isGameOver = false;
+                
+                const difficulty = window.innerWidth >= 768 ? difficultySelect.value : difficultySelectMobile.value;
+                difficultySelect.value = difficulty;
+                difficultySelectMobile.value = difficulty;
+                
                 scoreDisplay.textContent = score;
                 linesDisplay.textContent = lines;
                 levelDisplay.textContent = level;
+                scoreDisplayMobile.textContent = score;
+                linesDisplayMobile.textContent = lines;
+                levelDisplayMobile.textContent = level;
+                
                 gameOverOverlay.style.display = 'none';
-                startGameBtn.textContent = 'Recommencer';
                 
                 createBoard();
                 currentPiece = generatePiece();
@@ -698,6 +744,7 @@
                 if (isGameOver) return;
                 isPaused = !isPaused;
                 pauseBtn.textContent = isPaused ? 'Reprendre' : 'Pause';
+                pauseBtnMobile.textContent = isPaused ? 'Reprendre' : 'Pause';
                 if (isPaused) {
                     clearInterval(gameLoop);
                 } else {
@@ -735,10 +782,19 @@
             // Événements des boutons
             startGameBtn.addEventListener('click', startGame);
             pauseBtn.addEventListener('click', togglePause);
+            startGameBtnMobile.addEventListener('click', startGame);
+            pauseBtnMobile.addEventListener('click', togglePause);
+
+            // Synchronisation des sélecteurs de difficulté
+            difficultySelect.addEventListener('change', () => {
+                difficultySelectMobile.value = difficultySelect.value;
+            });
+            difficultySelectMobile.addEventListener('change', () => {
+                difficultySelect.value = difficultySelectMobile.value;
+            });
 
             // Initialisation
             loadHighScore();
-            
         });
     </script>
 </body>
